@@ -24,7 +24,8 @@ RUN apt-get update && \
     ansible \
     python3 \
     python3-dev \
-    python3-pip
+    python3-pip \
+    golang
 
 # Install Rake gem
 RUN gem install rake && \
