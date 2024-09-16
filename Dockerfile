@@ -25,21 +25,31 @@ RUN apt-get update && \
     python3 \
     python3-dev \
     python3-pip \
-    golang
+    golang \
+    && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-# Install Rake gem
+# Install Bundler gem
+RUN gem install bundler
+
+# Set workdir
+WORKDIR /app
+
+# Copy Gemfile and Gemfile.lock first for better cache utilization
+COPY Gemfile Gemfile.lock ./
+
+# Install Ruby gems
+RUN bundle install
+
+# Copy src
+COPY . .
+
+# Install Rake gem if it's not listed in Gemfile
 RUN gem install rake && \
     gem install http
 
 # Clean apt cache
 RUN apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
-
-# Set workdir
-WORKDIR /gitness
-
-# Copy src
-COPY . .
 
 # Init bash
 CMD ["/bin/bash"]
