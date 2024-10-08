@@ -26,6 +26,7 @@ RUN apt-get update && \
     python3-dev \
     python3-pip \
     golang \
+    ffmpeg \
     && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 # Install Bundler gem
