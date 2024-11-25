@@ -53,8 +53,6 @@ COPY . .
 RUN gem install rake && \
     gem install http
 
-RUN ssh-keygen -t rsa -b 2048 -N ''
-
 # Clean apt cache
 RUN apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
