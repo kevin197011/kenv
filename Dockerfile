@@ -4,7 +4,7 @@ FROM ubuntu:latest
 # Set env
 ENV DEBIAN_FRONTEND=noninteractive
 
-# Update and install package
+# Update and install packages
 RUN apt-get update && \
     apt-get install -y \
     software-properties-common \
@@ -27,10 +27,15 @@ RUN apt-get update && \
     python3-pip \
     golang \
     ffmpeg \
+    wget \
+    ca-certificates \
     && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 # Install Bundler gem
 RUN gem install bundler
+
+# Install Puppet Bolt (RubyGem)
+RUN gem install bolt
 
 # Set workdir
 WORKDIR /app
