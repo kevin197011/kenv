@@ -34,14 +34,18 @@ RUN apt-get update && \
 # Install Bundler gem
 RUN gem install bundler
 
-# Install Puppet Bolt (RubyGem)
-RUN gem install bolt
+# Download and install Puppet tools repository
+RUN wget https://apt.puppet.com/puppet-tools-release-jammy.deb && \
+    dpkg -i puppet-tools-release-jammy.deb && \
+    apt-get update && \
+    apt-get install -y puppet-bolt && \
+    rm -f puppet-tools-release-jammy.deb
 
 # Set workdir
 WORKDIR /app
 
 # Copy Gemfile and Gemfile.lock first for better cache utilization
-COPY Gemfile Gemfile.lock ./
+COPY Gemfile Gemfile.lock ./ 
 
 # Install Ruby gems
 RUN bundle install
