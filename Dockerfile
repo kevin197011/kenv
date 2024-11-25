@@ -1,10 +1,10 @@
-# Ubuntu base image
-FROM ubuntu:latest
+# Use a specific version of Ubuntu for stability
+FROM ubuntu:22.04
 
-# Set env
+# Set environment to non-interactive to avoid user prompts during package installations
 ENV DEBIAN_FRONTEND=noninteractive
 
-# Update and install packages
+# Install dependencies and clean up in one RUN statement
 RUN apt-get update && \
     apt-get install -y \
     software-properties-common \
@@ -28,39 +28,34 @@ RUN apt-get update && \
     golang \
     ffmpeg \
     wget \
-    ca-certificates \
-    && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+    ca-certificates && \
+    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-# Install Bundler gem
-RUN gem install bundler
+# Install Bundler, Puppet Bolt, Rake, and HTTP gems in one command to reduce layers
+RUN gem install bundler bolt rake http
 
-# Download and install Puppet tools repository
+# Download and install Puppet tools repository, then install Puppet Bolt in one step
 RUN wget https://apt.puppet.com/puppet-tools-release-jammy.deb && \
     dpkg -i puppet-tools-release-jammy.deb && \
     apt-get update && \
     apt-get install -y puppet-bolt && \
     rm -f puppet-tools-release-jammy.deb
 
-# Set workdir
+# Set the working directory for the app
 WORKDIR /app
 
-# Copy Gemfile and Gemfile.lock first for better cache utilization
-COPY Gemfile Gemfile.lock ./ 
+# Copy Gemfile and Gemfile.lock first to utilize Docker cache for bundler installation
+COPY Gemfile Gemfile.lock ./
 
-# Install Ruby gems
+# Install Ruby gems listed in Gemfile
 RUN bundle install
 
-# Copy src
+# Copy the rest of the application source code into the container
 COPY . .
 
-# Install Rake gem if it's not listed in Gemfile
-RUN gem install rake && \
-    gem install http
+# Clean up apt cache and temporary files to keep the image lean
+RUN apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-# Clean apt cache
-RUN apt-get clean && \
-    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
-
-# Init bash
+# Set the default command to bash
 CMD ["/bin/bash"]
 
